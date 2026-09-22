@@ -46,6 +46,6 @@ Initial release.
 - Left-click launches (or focuses) the `flyover` scope in a terminal.
 - Right-click toggles flyover's screensaver on/off.
 
-[Unreleased]: https://github.com/linuxbren/flyover-pill/compare/faecc8c...HEAD
-[1.1.0]: https://github.com/linuxbren/flyover-pill/compare/fe6292b...faecc8c
+[Unreleased]: https://github.com/linuxbren/flyover-pill/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/linuxbren/flyover-pill/compare/fe6292b...v1.1.0
 [1.0.0]: https://github.com/linuxbren/flyover-pill/commits/fe6292b
