@@ -5,12 +5,14 @@ import qs.Commons
 import qs.Ui
 import "Model.js" as Model
 
-// Ambient "aircraft nearby" count for the bar. Left-click launches the
-// flyover TUI scope in a new terminal; right-click toggles the flyover
-// screensaver on/off via Omarchy's own `omarchy branding screensaver
-// text|reset` (repurposed by flyover's packaging/screensaver patches).
-// Deliberately thin: this widget owns no scope-drawing or
-// screensaver-patching logic of its own — that all lives in flyover itself.
+// Ambient "aircraft nearby" count for the bar. Left-click opens a docked
+// popup (Panel.qml, following the clock/weather Loader + hostWidget
+// pattern) with a button that launches the flyover TUI scope in a new
+// terminal; right-click toggles the flyover screensaver on/off via
+// Omarchy's own `omarchy branding screensaver text|reset` (repurposed by
+// flyover's packaging/screensaver patches). Deliberately thin: this widget
+// owns no scope-drawing or screensaver-patching logic of its own — that all
+// lives in flyover itself.
 //
 // No hyprctl/focus-existing-window logic: this Hyprland build replaced the
 // classic string dispatchers (`hyprctl dispatch focuswindow class:...`) with
@@ -61,6 +63,10 @@ BarWidget {
   readonly property bool hasLocation: !isNaN(latitude) && !isNaN(longitude)
 
   property int aircraftCount: -1
+  // Sorted closest-first, each with distanceNm/bearingDeg already resolved —
+  // see Model.parseAdsbResponse. The panel plots this directly; BarWidget
+  // owns the fetch so the data survives the panel being closed/reopened.
+  property var aircraftList: []
   readonly property string displayText: !hasLocation
     ? "✈ ?"
     : (flyoverMissing
@@ -69,6 +75,53 @@ BarWidget {
 
   implicitWidth: button.implicitWidth
   implicitHeight: button.implicitHeight
+
+  // ---- Panel popup. Shape contract for shell.summon/hide/toggle routing:
+  //      Bar.findPanelWidget requires open/close/opened on the bar-widget
+  //      root, and switchPanelFrom/the popout-dot compare against this
+  //      widget rather than the nested Panel.qml item.
+  readonly property bool opened: panelLoader.item ? panelLoader.item.opened === true : false
+
+  function open() {
+    if (panelLoader.item) panelLoader.item.open()
+  }
+
+  function close() {
+    if (panelLoader.item) panelLoader.item.close()
+  }
+
+  function togglePanel() {
+    if (panelLoader.item) panelLoader.item.toggle()
+  }
+
+  readonly property bool popoutSwitchClosing: panelLoader.item ? panelLoader.item.popoutSwitchClosing === true : false
+
+  function closeForPopoutSwitch() {
+    if (panelLoader.item) panelLoader.item.closeForPopoutSwitch()
+  }
+
+  function injectPanel() {
+    var target = panelLoader.item
+    if (!target) return
+    if ("bar" in target) target.bar = root.bar
+    if ("settings" in target) target.settings = root.settings
+    if ("anchorItem" in target) target.anchorItem = button
+    if ("hostWidget" in target) target.hostWidget = root
+  }
+
+  onBarChanged: injectPanel()
+  onSettingsChanged: injectPanel()
+
+  Loader {
+    id: panelLoader
+    active: true
+    source: Qt.resolvedUrl("Panel.qml")
+    visible: false
+    onLoaded: {
+      root.injectPanel()
+      Qt.callLater(root.injectPanel)
+    }
+  }
 
   FileView {
     id: locationFile
@@ -96,7 +149,9 @@ BarWidget {
     stdout: StdioCollector {
       waitForEnd: true
       onStreamFinished: {
-        root.aircraftCount = Model.countAircraft(String(text || ""))
+        var parsed = Model.parseAdsbResponse(String(text || ""))
+        root.aircraftCount = parsed.count
+        root.aircraftList = parsed.aircraft
       }
     }
   }
@@ -183,18 +238,14 @@ BarWidget {
     anchors.fill: parent
     bar: root.bar
     text: root.displayText
-    tooltipText: !root.hasLocation
-      ? "set a location: omarchy-weather-location --set \"<name>\" <lat,lon>"
-      : (root.flyoverMissing
-          ? "flyover not installed — click for install instructions"
-          : (root.screensaverEnabled
-              ? "click: open scope · right-click: disable screensaver"
-              : "click: open scope · right-click: enable screensaver"))
+    // Tooltip suppressed because the panel is the detail view (it already
+    // shows the screensaver hint).
+    tooltipText: ""
     onPressed: function(b) {
       if (b === Qt.RightButton) {
         root.toggleScreensaver()
       } else {
-        root.openScope()
+        root.togglePanel()
       }
     }
   }
