@@ -46,14 +46,15 @@ Panel {
   readonly property real radarDiameter: Style.space(196)
 
   // Sweep: a rotating beam with a fading trail behind it, PPI-radar style.
-  // flyover's own scope (raster.rs draw_sweep / braille_scope.rs) only ever
-  // draws a single bare line for this, in the theme's accent color — no
-  // trailing fade exists there yet. This is a new visual for the pill, with
-  // an eye toward carrying it back to the full console app afterward, so it
-  // borrows that same accent-for-sweep convention but adds the fade.
-  readonly property int sweepPeriodMs: 6000
+  // Started as a pill-only visual (flyover's own scope had no trailing
+  // fade yet at the time) with an eye toward carrying it back to the
+  // console app — that's since happened (geometry.rs SWEEP_PERIOD /
+  // SWEEP_TRAIL_SPAN_DEG), so period and span are kept in sync with it by
+  // hand now. sweepTrailSteps has no console equivalent to match — that's
+  // this panel's own fixed sample count, not derived from anything shared.
+  readonly property int sweepPeriodMs: 40000
   readonly property int sweepTrailSteps: 22
-  readonly property real sweepTrailSpanDeg: 60
+  readonly property real sweepTrailSpanDeg: 25
   property real sweepAngle: 0
 
   readonly property string statusTitle: {

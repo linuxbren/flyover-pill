@@ -138,6 +138,21 @@ BarWidget {
     }
   }
 
+  // Belt-and-suspenders on top of watchChanges above: inotify-style
+  // watches can miss an update if whatever wrote the file replaced it
+  // (temp file + rename) rather than writing in place, which invalidates
+  // a watch tied to the old inode — omarchy-weather-location currently
+  // does a plain in-place `>` write, so that specific gap shouldn't apply
+  // today, but a location change is rare and worth being sure about
+  // regardless of how it got written. Light on purpose: this only needs
+  // to eventually notice, not react immediately.
+  Timer {
+    interval: 300000
+    running: true
+    repeat: true
+    onTriggered: locationFile.reload()
+  }
+
   function refresh() {
     if (root.hasLocation && !fetchProc.running) fetchProc.running = true
   }
