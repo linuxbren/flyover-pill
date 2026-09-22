@@ -1,5 +1,7 @@
 # flyover-pill
 
+![flyover-pill popup screenshot](docs/screenshot.png)
+
 An Omarchy bar widget: an ambient "aircraft nearby" count for the bar.
 Left-click opens a docked popup with its own live mini radar (range
 rings, rotating sweep, nearby contacts) plus a button to launch the full
