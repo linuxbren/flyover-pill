@@ -2,9 +2,9 @@
   "schemaVersion": 1,
   "id": "bren.flyover",
   "name": "Flyover",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "author": "bren",
-  "description": "Ambient nearby-aircraft count; click to open the flyover scope",
+  "description": "Ambient nearby-aircraft count; click for a live mini radar and to open the flyover scope",
   "kinds": [
     "bar-widget"
   ],
@@ -13,7 +13,7 @@
   },
   "barWidget": {
     "displayName": "Flyover",
-    "description": "Ambient nearby-aircraft count; click to open the flyover scope",
+    "description": "Ambient nearby-aircraft count; click for a live mini radar and to open the flyover scope",
     "category": "Info",
     "allowMultiple": false
   }

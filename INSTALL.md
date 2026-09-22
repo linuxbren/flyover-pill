@@ -28,7 +28,9 @@ ln -sf ~/.cargo/bin/flyover ~/.local/bin/flyover
 
 **If you built from source** (`git clone` + `cargo build --release`):
 
-The widget checks `~/flyover/target/release/flyover` as a last resort, but only if the directory is named exactly `flyover` in your home directory. If you cloned it elsewhere, either move/rename it, or symlink the binary into `~/.local/bin` per the previous section.
+The widget doesn't check a build-tree path at all — symlink the binary
+into `~/.local/bin` per the previous section, or `cargo install --path .`
+from your clone so it lands in the checked `~/.cargo/bin`.
 
 **If you installed from a package manager** (`pacman`, AUR, etc.):
 
@@ -47,7 +49,7 @@ Once you install flyover, restart the Omarchy shell (`omarchy-restart-shell`) so
 ## How to verify
 
 1. **Terminal test** — run `flyover` in a foot terminal directly. If a radar scope appears, the binary itself is fine and the problem is only the widget's path resolution.
-2. **Pill click** — once step 1 works, click the `✈ N` pill. A new foot window should open with the same scope.
+2. **Pill click** — once step 1 works, click the `✈ N` pill. A docked popup should open with its own live mini radar; its "Open flyover" button should open a new foot window with the same scope as step 1.
 3. **Right-click** — if you've applied flyover's [screensaver patch](https://github.com/linuxbren/flyover/tree/master/packaging/screensaver), right-clicking the pill toggles the flyover screensaver on/off (using the repurposed `omarchy branding screensaver text|reset` command).
 
 If step 1 works but step 2 doesn't, you're hitting the path issue described above — work through "What to do" in order.
